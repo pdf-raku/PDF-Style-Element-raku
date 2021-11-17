@@ -9,7 +9,6 @@ class PDF::Style::Element::Text
     use CSS::Properties;
     use PDF::Style::Font;
 
-    use PDF::Content::Color :&color, :&gray;
     use PDF::Content::Text::Box;
     use PDF::Content::FontObj;
     has PDF::Content::Text::Box $.text;
@@ -30,22 +29,9 @@ class PDF::Style::Element::Text
         nextwith(:$css, :&build-content, :$container, :$tag);
     }
 
-    method !set-font-color($gfx) {
-        with $.css.color {
-            $gfx.FillColor = color $_;
-            $gfx.FillAlpha = .a / 255;
-        }
-        else {
-            $gfx.FillColor = gray(0.0);
-            $gfx.FillAlpha = 1.0;
-        }
-        $gfx.StrokeAlpha = 1.0;
-    }
-
     method render-element($gfx) {
         with $!text -> \text {
             my $top = $.top - $.bottom;
-            self!set-font-color($gfx);
             $gfx.print(text, :position[ :left(0), :$top]);
         }
     }

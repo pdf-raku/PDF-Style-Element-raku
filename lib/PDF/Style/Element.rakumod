@@ -5,6 +5,7 @@ use PDF::Style::Basic;
 class PDF::Style::Element
     is PDF::Style::Basic {
     use PDF::Content::Canvas;
+    use PDF::Content::Color :&color, :&gray;
     use PDF::Content::XObject;
     use CSS::Properties;
     use CSS::Stylesheet;
@@ -22,8 +23,8 @@ class PDF::Style::Element
     method !xobject(|c) {
         my @BBox = self!bbox;
         my PDF::Content::Canvas \image .= xobject-form: :@BBox;
-        image.graphics: -> $gfx {
-            self!render($gfx, |c);
+        self.graphics: image.gfx, {
+            self!render($_, |c);
         }
         image.finish;
         image;
@@ -32,10 +33,10 @@ class PDF::Style::Element
     # containerized rendering when xobjects are preferred
     method xobject(|c) {
         # apply opacity to an image group as a whole
-        my $opacity = $.css.opacity.Num;
         my PDF::Content::Canvas:D $xobject = self!xobject(|c);
+        my $opacity = $.css.opacity.Num;
 
-        unless $opacity =~= 1 {
+        if $opacity < 1 {
            # need to box it, to apply transparency.
            my @BBox = self!bbox;
            my PDF::Content::Canvas:D $outer .= xobject-form: :@BBox;
@@ -60,34 +61,29 @@ class PDF::Style::Element
     # non-containerized rendering.
     method render($gfx, $x = $.left, $y = $.bottom, |c) {
         self!mark: $gfx, {
-            my $opacity = $.css.opacity.Num;
 
-            if $opacity < 1 && || ! self.isa("PDF::Style::Element::Text") {
+            if ! self.isa("PDF::Style::Element::Text") && $.css.opacity.Num < 1 {
                # need to box it, to apply transparency.
                 my @BBox = self!bbox;
                my PDF::Content::Canvas:D $xobject .= xobject-form: :@BBox;
-               $xobject.graphics: {
-                   .FillAlpha = .StrokeAlpha = $opacity;
+               self.graphics: $xobject.gfx, {
                    self!render($_, |c);
                }
                $gfx.do: $xobject, $x, $y, :valign<bottom>;
             }
             else {
                 $gfx.Save;
-                .FillAlpha = .StrokeAlpha = $opacity
-                    if $opacity < 1;
-
-                $gfx.transform: :translate[$x, $y];
-                self!render($gfx, |c);
-                $gfx.Restore;
+                self.render: $gfx, {
+                    .transform: :translate[$x, $y];
+                    self!render($_, |c);
+                }
             }
         }
     }
 
-    method !render($gfx, :$comment) {
-        $gfx.add-comment($_) with $comment;
-        self.style-box($gfx);
-        self.render-element($gfx);
+    method !render(PDF::Content $_) {
+        self.style-box($_);
+        self.render-element($_);
     }
 
     our sub measure(CSS::Properties $css, $v, |c) {

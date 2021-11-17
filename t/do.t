@@ -13,12 +13,9 @@ my PDF::Class $pdf .= new;
 my $page = $body.decorate: $pdf.add-page;
 $page.gfx.comment = True;
 
-my CSS::Properties() $css = "font-family:Vera; font-weight: 200;width:250pt; height:80pt; border: 1px solid green; padding:2pt";
+my CSS::Properties() $css = "font-family:Vera; font-weight: 200;width:250pt; height:80pt; border: 1px solid green; padding:2pt; opacity:.8";
 
-my $text = q:to"--ENOUGH!!--".lines.join: ' ';
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.
-        --ENOUGH!!--
+my $text = $css.Str ~ ' Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt';
 
 $css.left = '50pt';
 $css.bottom = '700pt';
@@ -30,7 +27,6 @@ $page.graphics: -> $gfx {
     $gfx.do(.xobject, .left, .bottom) with $text-elem;;
 
     my Str $image = "t/images/snoopy-happy-dance.jpg";
-    $css.opacity = .5;
     $css.delete("height");
     my $image-elem = $body.element(:$image, :$css);
     $gfx.do(.xobject, .left, .bottom - $image-elem.height('padding'))
