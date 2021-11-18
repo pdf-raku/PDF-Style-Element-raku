@@ -23,7 +23,7 @@ class PDF::Style::Body
             %opt<height> = %opt<viewport-height> = 0pt + .height;
         }
         # replace regular box with a page box.
-        my $css  = self.box.css;
+        my $css = self.box.css;
         my PDF::Style::Font $font = self.box.font;
         $font.base-url = $_ with $base-url;
         $font.font-face.append: @font-face;

@@ -16,7 +16,7 @@ my ($page, $n); # closure variables
 sub test($body, $base-css, $settings = {}, Bool :$feed = True) {
     my $css = $base-css.clone(|$settings);
     my $text = $css.clone(background-image => :url<...>).write;
-    warn {:$text}.perl;
+    warn {:$text}.raku;
     my $elem = $body.element( :$text, :$css );
     @Html.push: $elem.html;
     .render($page.gfx, .left, .bottom) with $elem;

@@ -65,15 +65,15 @@ class PDF::Style::Element
             if ! self.isa("PDF::Style::Element::Text") && $.css.opacity.Num < 1 {
                # need to box it, to apply transparency.
                 my @BBox = self!bbox;
-               my PDF::Content::Canvas:D $xobject .= xobject-form: :@BBox;
-               self.graphics: $xobject.gfx, {
-                   self!render($_, |c);
-               }
+                my PDF::Content::Canvas:D $xobject .= xobject-form: :@BBox;
+
+                self.graphics: $xobject.gfx, {
+                    self!render($_, |c);
+                }
                $gfx.do: $xobject, $x, $y, :valign<bottom>;
             }
             else {
-                $gfx.Save;
-                self.render: $gfx, {
+                self.graphics: $gfx, {
                     .transform: :translate[$x, $y];
                     self!render($_, |c);
                 }

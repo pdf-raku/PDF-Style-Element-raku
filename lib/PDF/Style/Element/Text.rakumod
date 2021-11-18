@@ -8,6 +8,7 @@ class PDF::Style::Element::Text
     use CSS::Box;
     use CSS::Properties;
     use PDF::Style::Font;
+    use PDF::Style::Basic :&text-box-options;
 
     use PDF::Content::Text::Box;
     use PDF::Content::FontObj;
@@ -19,10 +20,10 @@ class PDF::Style::Element::Text
                           CSS::Box :$container!,
                           PDF::Tags::Elem :$tag,
         ) {
-
-        my PDF::Style::Font $font = $container.font.setup($css);
+        my PDF::Style::Font $font = $container.font;
+        $font.css = $css;
         my Numeric $ref = $container.width;
-        my %opt = self.text-box-options( :$font, :$css, :$ref);
+        my %opt = text-box-options( :$font, :$css, :$ref);
         my &build-content = sub (|c) {
             text => PDF::Content::Text::Box.new( :$text, |%opt, |c);
         };

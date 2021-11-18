@@ -24,7 +24,7 @@ sub test($body, $css, $settings = {}, Bool :$feed = True) {
         for $settings.pairs;
 
     my $text = $css.write;
-    warn {:$text}.perl;
+    warn {:$text}.raku;
     my $elem = $body.element( :$text, :$css );
     @Html.push: $elem.html;
     .render($page.gfx, .left, .bottom) with $elem;
