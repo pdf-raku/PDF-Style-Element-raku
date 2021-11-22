@@ -16,7 +16,7 @@ my @Html = '<html>', $body.html-start;
 
 my PDF::Class $pdf .= new;
 my $page = $body.decorate: $pdf.add-page;
-$page.gfx.comment = True;
+$body.gfx.comment = True;
 my $n;
 
 sub test($body, $css, $settings = {}, Bool :$feed = True) {
@@ -27,7 +27,7 @@ sub test($body, $css, $settings = {}, Bool :$feed = True) {
     warn {:$text}.raku;
     my $elem = $body.element( :$text, :$css );
     @Html.push: $elem.html;
-    .render($page.gfx, .left, .bottom) with $elem;
+    .render(.left, .bottom) with $elem;
 
     if ($feed) {
         if ++$n %% 2 {

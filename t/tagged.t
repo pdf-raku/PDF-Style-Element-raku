@@ -1,6 +1,6 @@
 use v6;
 use Test;
-plan 5;
+plan 6;
 
 use PDF::Tags;
 use PDF::Tags::Elem;
@@ -21,10 +21,11 @@ my $elem = $body.element: :text("Tagged/Styled PDF Demo"), :tag($header);
 ok $elem.tag.defined;
 is $elem.css, "display:block; font-size:2em; font-weight:bolder; margin-bottom:0.67em; margin-top:0.67em; unicode-bidi:embed;";
 isa-ok $elem.tag, 'PDF::Tags::Elem';
-.render($page.gfx, 10, 750) with $elem;
+.render(10, 750) with $elem;
 my Str $image = "t/images/snoopy-happy-dance.jpg";
 my CSS::Properties() $css = "padding:2px; border:1px dashed red; opacity:0.5";
 my $image-elem = $body.element(:$image, :tag($figure), :$css);
 is $image-elem.css, "border:1px dashed red; opacity:0.5; padding:2px;";
-.render($page.gfx, 10, 550) with $image-elem;
+ok $image-elem.gfx.defined;
+.render(10, 550) with $image-elem;
 lives-ok {$pdf.save-as: "t/tagged.pdf"};

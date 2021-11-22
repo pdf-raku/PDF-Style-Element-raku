@@ -1,6 +1,6 @@
 use v6;
 
-use PDF::Style::Element :&css-width, :&css-height;
+use PDF::Style::Element;
 
 class PDF::Style::Element::Image
     is PDF::Style::Element {
@@ -11,6 +11,7 @@ class PDF::Style::Element::Image
     use PDF::Content;
     use PDF::Content::XObject;
     use PDF::Tags::Elem;
+    use PDF::Style::Util :&css-width, :&css-height;
 
     our class ScaledImage {
         has PDF::Content::XObject $.xobject is required handles <width height data-uri>;
@@ -61,6 +62,7 @@ class PDF::Style::Element::Image
         CSS::Properties :$css!,
         CSS::Box :$container!,
         PDF::Tags::Elem :$tag,
+        PDF::Content :$gfx,
     ) {
         my $width = css-width($container, $css);
         my $height = css-height($container, $css);
@@ -68,7 +70,7 @@ class PDF::Style::Element::Image
             my ScaledImage $image .= new( :$xobject, :$css, :$width, :$height );
             :$image;
         }
-        nextwith(:$css, :&build-content, :$container, :$tag);
+        nextwith(:$css, :&build-content, :$container, :$tag, :$gfx);
     }
 
     method html {

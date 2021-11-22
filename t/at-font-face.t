@@ -25,7 +25,7 @@ my @Html = '<html>', $body.html-start;
 
 my $elem = $body.element( :text("Mono Text"), :$css);
 @Html.push: $elem.html;
-$elem.render: $Page.gfx;
+$elem.render();
 my PDF::Font::Loader::FontObj $font-obj = $body.box.font.font-obj;
 is $font-obj.font-name, "FreeMono";
 

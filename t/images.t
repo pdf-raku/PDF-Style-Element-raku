@@ -16,7 +16,7 @@ my @Html = '<html>', $body.html-start;
 
 my PDF::Class $pdf .= new;
 my $page = $body.decorate: $pdf.add-page;
-$page.gfx.comment = True;
+$body.gfx.comment = True;
 my $n;
 
 my $image = "t/images/snoopy-happy-dance.jpg";
@@ -45,7 +45,7 @@ sub test($body, $base-css, $settings = {}, Str :$caption is copy, |c) {
     $css.set-properties(|$settings);
     my $elem = $body.element( :$css, |c );
     @Html.push: $elem.html;
-    .render($page.gfx, .left, .bottom) with $elem;
+    .render(.left, .bottom) with $elem;
 
     $caption //= ~ CSS::Properties.new: |$settings;
     if $caption {
@@ -59,7 +59,7 @@ sub test($body, $base-css, $settings = {}, Str :$caption is copy, |c) {
         $caption-css.delete('height');
         my $caption-box = $body.element( :css($caption-css), :text($caption) );
         @Html.push: $caption-box.html;
-        .render($page.gfx, .left, .bottom) with $caption-box;
+        .render(.left, .bottom) with $caption-box;
     }
 
     if ++$n %% 2 {

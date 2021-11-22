@@ -24,7 +24,7 @@ sub show-text($text, :$css!) {
     my $elem = $body.element( :$text, :$css);
     @Html.push: $elem.html;
 
-    $elem.render: $Page.gfx;
+    $elem.render;
     if ++$N %% 5 {
         $css.top +css= 35pt;
         $css.left = 10pt;

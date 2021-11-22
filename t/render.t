@@ -23,21 +23,19 @@ my $text = q:to"--ENOUGH!!--".lines.join: ' ';
 $css.left = '50pt';
 $css.bottom = '700pt';
 
-$page.graphics: -> $gfx {
-    my $text-elem = $body.element( :$text, :$css);
-    $text-elem.render($gfx);
+my $text-elem = $body.element( :$text, :$css);
+$text-elem.render;
 
-    my Str $image = "t/images/snoopy-happy-dance.jpg";
-    $css.delete("height");
-    $css.opacity = .5;
-    my $image-elem = $body.element(:$image, :$css);
-    $image-elem.translate: 0, -$image-elem.height('padding');
-    .render($gfx, .left, .bottom)
-        with $image-elem;
-    $image-elem.css.opacity = 1;
-     $image-elem.translate: 30, -30;
-    .render($gfx, .left, .bottom)
-        with $image-elem;
-}
+my Str $image = "t/images/snoopy-happy-dance.jpg";
+$css.delete("height");
+$css.opacity = .5;
+my $image-elem = $body.element(:$image, :$css);
+$image-elem.translate: 0, -$image-elem.height('padding');
+.render(.left, .bottom)
+    with $image-elem;
+$image-elem.css.opacity = 1;
+$image-elem.translate: 30, -30;
+.render(.left, .bottom)
+    with $image-elem;
 
 lives-ok {$pdf.save-as: "t/render.pdf"};

@@ -16,19 +16,19 @@ my PDF::Style::Body $body .= new;
 
 my PDF::Class $pdf .= new;
 my PDF::Page $Page = $body.decorate: $pdf.add-page;
-$Page.gfx.comment = True;
+$body.gfx.comment = True;
 my @Html = '<html>', $body.html-start;
 
 sub show-text($text, :$css!) {
     my $elem = $body.element( :$text, :$css);
-    .render($Page.gfx, .left, .bottom) with $elem;
+    .render(.left, .bottom) with $elem;
     @Html.push: $elem.html;
     $elem;
 }
 
 for <left center right justify> -> $alignment {
     my $header = [~] '*** ALIGN:', $alignment, ' ***', "\n";
-    my $body = q:to"--ENOUGH!!--".lines.join: ' ';
+    my $text = q:to"--ENOUGH!!--".lines.join: ' ';
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
         ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.
         --ENOUGH!!--
@@ -41,7 +41,7 @@ for <left center right justify> -> $alignment {
     $css.top  +css= 15pt;
 
     $css.font-weight = 'normal';
-    show-text($body ~ ' ' ~ $css.write, :$css);
+    show-text($text ~ ' ' ~ $css.write, :$css);
     $css.top  +css= 120pt;
 }
 
@@ -52,20 +52,20 @@ $css.width = 220pt;
 
 for <top middle bottom> -> $valign {
     my $header = [~] '*** VERTICAL-ALIGN:', $valign, ' ***', "\n";
-    my $body = q:to"--ENOUGH!!--".lines.join: ' ';
+    my $text = q:to"--ENOUGH!!--".lines.join: ' ';
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
         --ENOUGH!!--
+    $text ~= $style;
 
     note "% **** valign $valign *** ";
     $css.delete('height', 'vertical-align');
     $css.font-weight = 'bold';
     show-text($header, :$css);
 
-    $css.top  +css= 15pt;
+    $css.top +css= 15pt;
     $css.font-weight = 'normal';
     $css.height = 130pt;
     $css.vertical-align = $valign;
-    my $text = $body ~ $style;
     show-text($text, :$css);
 
     $css.top  +css= 165pt;

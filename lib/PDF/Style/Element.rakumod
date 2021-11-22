@@ -1,9 +1,10 @@
 use v6;
 
-use PDF::Style::Basic;
+use PDF::Style;
 
 class PDF::Style::Element
-    is PDF::Style::Basic {
+    is PDF::Style {
+    use PDF::Content;
     use PDF::Content::Canvas;
     use PDF::Content::Color :&color, :&gray;
     use PDF::Content::XObject;
@@ -12,7 +13,7 @@ class PDF::Style::Element
     use CSS::Box :Edges;
     use CSS::Units :Lengths, :pt;
     use PDF::Tags::Elem;
-
+    use PDF::Style::Util :&measure, :&css-height, :&css-width;
     has PDF::Tags::Elem $.tag;
 
     method !bbox {
@@ -23,7 +24,8 @@ class PDF::Style::Element
     method !xobject(|c) {
         my @BBox = self!bbox;
         my PDF::Content::Canvas \image .= xobject-form: :@BBox;
-        self.graphics: image.gfx, {
+        my $gfx = image.gfx;
+        self.graphics: :$gfx, {
             self!render($_, |c);
         }
         image.finish;
@@ -59,7 +61,10 @@ class PDF::Style::Element
     }
 
     # non-containerized rendering.
-    method render($gfx, $x = $.left, $y = $.bottom, |c) {
+    method render(
+        $x = $.left, $y = $.bottom,
+        PDF::Content :$gfx = $.gfx,
+    |c) {
         self!mark: $gfx, {
 
             if ! self.isa("PDF::Style::Element::Text") && $.css.opacity.Num < 1 {
@@ -67,13 +72,13 @@ class PDF::Style::Element
                 my @BBox = self!bbox;
                 my PDF::Content::Canvas:D $xobject .= xobject-form: :@BBox;
 
-                self.graphics: $xobject.gfx, {
+                self.graphics: :gfx($xobject.gfx), {
                     self!render($_, |c);
                 }
                $gfx.do: $xobject, $x, $y, :valign<bottom>;
             }
             else {
-                self.graphics: $gfx, {
+                self.graphics: :$gfx, {
                     .transform: :translate[$x, $y];
                     self!render($_, |c);
                 }
@@ -86,43 +91,13 @@ class PDF::Style::Element
         self.render-element($_);
     }
 
-    our sub measure(CSS::Properties $css, $v, |c) {
-        $v ~~ 'auto' ?? Numeric !! $css.measure($v, |c);
-    }
-
-    sub css-height(CSS::Box $_, CSS::Properties $css, :$ref = $css.reference-width) is export(:css-height) {
-        my $height = $_ with measure($css, $css.height, :$ref);
-        with .measure($css.max-height, :$ref) {
-            $height = $_
-                if $height.defined && $height > $_;
-        }
-        with .measure($css.min-height, :$ref) {
-            $height = $_
-                if $height.defined && $height < $_;
-        }
-
-        $height;
-    }
-
-    sub css-width(CSS::Box $_, CSS::Properties $css, :$ref = $css.reference-width) is export(:css-width) {
-        my $width = $_ with measure($css, $css.width, :$ref);
-        with .measure($css.max-width, :$ref) {
-            $width = $_
-                if !$width.defined || $width > $_;
-        }
-        with .measure($css.min-width, :$ref) {
-            $width = $_
-                if $width.defined && $width < $_;
-        }
-        $width;
-    }
-
     #| create and position content within a containing box
     method place-element(
         CSS::Properties :$css!,
         :&build-content = sub (|c) {},
         CSS::Box :$container!,
         PDF::Tags::Elem :$tag,
+        PDF::Content :$gfx,
     ) {
         my $ref    = $container.width;
         my $top    = measure($container.css, $css.top, :$ref);
@@ -183,7 +158,7 @@ class PDF::Style::Element
         my $vw = $container.viewport-width;
         my $vh = $container.viewport-height;
         $css.reference-width = $ref;
-        my \elem = self.new: :$css, :$left, :top(pdf-top), :$width, :$height, :$em, :$ex, :$vw, :$vh, :$tag, |($type => $content);
+        my \elem = self.new: :$css, :$gfx, :$left, :top(pdf-top), :$width, :$height, :$em, :$ex, :$vw, :$vh, :$tag, |($type => $content);
 
         # reposition to outside of border
         my Numeric @content-box[4] = elem.Array.list;
@@ -201,7 +176,7 @@ class PDF::Style::Element
 
     method element(|c) {
         require PDF::Style::Body;
-        state $body //= PDF::Style::Body.new: :width(1684), :height(2381);
+        state $body //= PDF::Style::Body.new: :width(1684pt), :height(2381pt);
         $body.element(|c);
     }
 

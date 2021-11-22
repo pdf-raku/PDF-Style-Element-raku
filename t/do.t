@@ -20,17 +20,14 @@ my $text = $css.Str ~ ' Lorem ipsum dolor sit amet, consectetur adipiscing elit,
 $css.left = '50pt';
 $css.bottom = '700pt';
 
-$page.graphics: -> $gfx {
+my $text-elem = $body.element( :$text, :$css);
+does-ok $text-elem.xobject, PDF::Content::XObject;
+.gfx.do(.xobject, .left, .bottom) with $text-elem;;
 
-    my $text-elem = $body.element( :$text, :$css);
-    does-ok $text-elem.xobject, PDF::Content::XObject;
-    $gfx.do(.xobject, .left, .bottom) with $text-elem;;
-
-    my Str $image = "t/images/snoopy-happy-dance.jpg";
-    $css.delete("height");
-    my $image-elem = $body.element(:$image, :$css);
-    $gfx.do(.xobject, .left, .bottom - $image-elem.height('padding'))
-        with $image-elem;
-}
+my Str $image = "t/images/snoopy-happy-dance.jpg";
+$css.delete("height");
+my $image-elem = $body.element(:$image, :$css);
+.gfx.do(.xobject, .left, .bottom - $image-elem.height('padding'))
+    with $image-elem;
 
 $pdf.save-as: "t/do.pdf";

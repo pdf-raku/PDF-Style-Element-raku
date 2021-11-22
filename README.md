@@ -29,10 +29,11 @@ my $text = q:to"--ENOUGH!!--".lines.join: ' ';
 
 $css.bottom = 20pt;
 $css.left = 20pt;
-my PDF::Style::Element $text-elem .= element: :$text, :$css;
+my $gfx = $page.gfx;
+my PDF::Style::Element $text-elem .= element: :$text, :$css, :$gfx;
 
 # display it on the page
-.render( $page.gfx, .bottom, .left) given $text-elem;
+.render( .bottom, .left) given $text-elem;
 $pdf.save-as: "examples/styled-text.pdf";
 ```
 ![example.pdf](examples/.previews/styled-text-001.png)
@@ -69,18 +70,19 @@ my PDF::Class $pdf .= new;
 
 # Create a page, sized and decorated from the body element
 my $page = $body.decorate: $pdf.add-page;
+my $gfx = $page.gfx;
 
 # create and lay up some styled elements
 my CSS::Properties() $css = "font-family:Helvetica; width:250pt; height:80pt; top:20pt; left:20pt; border: 1pt solid green; padding: 2pt";
 
 my $text = "Text, styled as $css";
 
-my PDF::Style::Element $text-elem = $body.element( :$text, :$css );
+my PDF::Style::Element $text-elem = $body.element( :$text, :$css, :gfx );
 
 given $text-elem {
     note "text top-left is {.top}pt {.left}pt from page bottom, left corner";
     # output the element on the page.
-    .render($page.gfx, .left, .bottom);
+    .render(.left, .bottom);
 }
 
 # now position an image below the text block,
@@ -91,15 +93,15 @@ $css.top +css= ($text-elem.height('padding') + 5)pt;
 $css.height = Nil;
 
 my Str $image = "t/images/snoopy-happy-dance.jpg";
-given $body.element(:$image, :$css) {
+given $body.element(:$image, :$css, :$gfx) {
     note "image bottom-right is {.bottom}pt {.left}pt from page bottom, left corner";
-    .render($page.gfx, .left, .bottom);
+    .render(.left, .bottom);
 }
 
 # position from bottom right
 $css .= COERCE: "border:2pt dashed green; bottom:5pt; color:blue; font-family:Helvetica; padding:2pt; right:5pt; text-align:right; width:120pt;";
-.render($page.gfx, .left, .bottom)
-    given $body.element( :text("Text styled as $css"), :$css );
+.render(.left, .bottom)
+    given $body.element( :text("Text styled as $css"), :$css, :$gfx );
 
 $pdf.save-as: "examples/styling.pdf";
 # also save as HTML
@@ -136,7 +138,7 @@ my PDF::Class $pdf .= new;
 my $Page = $body.decorate: $pdf.add-page;
 
 my $elem = $body.element( :text("Mono Text"), :$css);
-$elem.render: $Page.gfx;
+$elem.render: gfx => $Page.gfx;
 
 $pdf.save-as: "/tmp/at-font-face.pdf";
 ```
@@ -165,19 +167,20 @@ my PDF::Page $page = $body.decorate: $pdf.add-page;
 my CSS::TagSet::TaggedPDF $styler .= new;
 my PDF::Tags $tags .= create: :$pdf, :$styler;
 my PDF::Tags::Elem $doc = $tags.Document;
+my $gfx = $page.gfx;
 
 # add tagged/styled header text
 my PDF::Tags::Elem $header = $doc.Header1;
-my $elem = $body.element: :text("Tagged/Styled PDF Demo"), :tag($header);
+my $elem = $body.element: :text("Tagged/Styled PDF Demo"), :tag($header), :$gfx;
 note $elem.css; # display:block; font-size:2em; font-weight:bolder; margin-bottom:0.67em; margin-top:0.67em; unicode-bidi:embed;
-.render($page.gfx, 10, 750) with $elem;
+.render( 10, 750) with $elem;
 
 # add tagged/styled figure image
 my PDF::Tags::Elem $figure = $doc.Figure: :Alt("light bulb");
 my Str $image = "t/images/snoopy-happy-dance.jpg";
 my CSS::Properties() $css = "padding:2px; border:1px dashed red; opacity:0.5";
-my $image-elem = $body.element(:$image, :tag($figure), :$css);
-.render($page.gfx, 10, 550) with $image-elem;
+my $image-elem = $body.element(:$image, :tag($figure), :$css, :$gfx);
+.render(10, 550) with $image-elem;
 
 $pdf.save-as: "t/tag-demo.pdf"
 ```

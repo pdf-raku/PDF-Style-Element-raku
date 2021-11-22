@@ -16,9 +16,9 @@ class PDF::Style::Body
     use CSS::Font::Descriptor;
     use URI;
 
-    submethod TWEAK(:$gfx, CSS::Font::Descriptor :@font-face, URI() :$base-url, |c) {
+    submethod TWEAK(:gfx($), CSS::Font::Descriptor :@font-face, URI() :$base-url, |c) {
         my %opt;
-        with $gfx {
+        with self.gfx {
             %opt<width>  = %opt<viewport-width>  = 0pt + .width;
             %opt<height> = %opt<viewport-height> = 0pt + .height;
         }
@@ -32,11 +32,11 @@ class PDF::Style::Body
 
     #| decorate the background of a PDF page, xobject, or pattern that's acting as a body
     method decorate(PDF::Content::Canvas $_, :$resize) {
-        my $gfx = .gfx;
-        self.TWEAK(:$gfx) if $resize;
+        self.gfx = .gfx;
+        self.TWEAK if $resize;
         (.can('BBox') ?? .BBox !! .media-box) = [0, 0, self.width("margin"), self.height("margin") ];
         # draw borders + background image
-        .render($gfx, .left, .bottom) with self;
+        .render(.left, .bottom) with self;
         $_;
     }
 
@@ -108,6 +108,7 @@ class PDF::Style::Body
     # compute style from :$tag and :$css arguments
     method !args(*%o) {
         %o<container> //= self.box;
+        %o<gfx> //= $_ with self.gfx;
 
         with %o<tag> {
             with .style -> $tag-css {

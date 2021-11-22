@@ -7,8 +7,9 @@ class PDF::Style::Element::Text
 
     use CSS::Box;
     use CSS::Properties;
+    use PDF::Content;
     use PDF::Style::Font;
-    use PDF::Style::Basic :&text-box-options;
+    use PDF::Style :&text-box-options;
 
     use PDF::Content::Text::Box;
     use PDF::Content::FontObj;
@@ -19,6 +20,7 @@ class PDF::Style::Element::Text
                           CSS::Properties :$css!,
                           CSS::Box :$container!,
                           PDF::Tags::Elem :$tag,
+                          PDF::Content :$gfx,
         ) {
         my PDF::Style::Font $font = $container.font;
         $font.css = $css;
@@ -27,7 +29,7 @@ class PDF::Style::Element::Text
         my &build-content = sub (|c) {
             text => PDF::Content::Text::Box.new( :$text, |%opt, |c);
         };
-        nextwith(:$css, :&build-content, :$container, :$tag);
+        nextwith(:$css, :&build-content, :$container, :$tag, :$gfx);
     }
 
     method render-element($gfx) {

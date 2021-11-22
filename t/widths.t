@@ -15,7 +15,7 @@ my PDF::Style::Body $body .= new;
 
 my PDF::Class $pdf .= new;
 my $page = $body.decorate: $pdf.add-page;
-$page.gfx.comment = True;
+$body.gfx.comment = True;
 my @html = '<html>', $body.html-start;
 my $n;
 
@@ -47,7 +47,7 @@ for [ '_=_' => '=',
     my $text = (++$n,.value, ':', .key, $style).join: ' ';
     my $elem = $body.element( :$text, :$css );
     @html.push: $elem.html;
-    .render($page.gfx, .left, .bottom) with $elem;
+    .render(.left, .bottom) with $elem;
 
     my $elem-width = $elem.right - $elem.left;
     my $expected-width = $test-width eq 'long'

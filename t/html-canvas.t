@@ -30,7 +30,7 @@ sub test($body, $css, $properties = {}, :$html-canvas!, Bool :$feed = True) {
     my $elem = $body.element( :$html-canvas, :$css );
 
     @Html.push: $elem.html;
-    .render($page.gfx, .left, .bottom) with $elem;
+    .render(.left, .bottom) with $elem;
 
     if ($feed) {
         if ++$n %% 2 {

@@ -19,7 +19,7 @@ sub test($body, $base-css, $settings = {}, Bool :$feed = True) {
     warn {:$text}.raku;
     my $elem = $body.element( :$text, :$css );
     @Html.push: $elem.html;
-    .render($page.gfx, .left, .bottom) with $elem;
+    .render(.left, .bottom) with $elem;
 
     if ++$n %% 2 {
         $base-css.top +css= 100pt;
